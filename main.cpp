@@ -85,7 +85,7 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 		
 		shaderProgram.Activate();
-		glUniform1f(uniID, 0.0f);
+		glUniform1f(uniID, 0.5f);
 		VAO1.Bind();
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glfwSwapBuffers(window);

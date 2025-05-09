@@ -1,23 +1,23 @@
-﻿  main.cpp
-glfw3.lib(init.obj) : warning LNK4099: nie znaleziono pliku PDB "" z elementem "glfw3.lib(init.obj)" lub w pozycji ""; obiekt zostanie skonsolidowany bez informacji debugowania
-glfw3.lib(window.obj) : warning LNK4099: nie znaleziono pliku PDB "" z elementem "glfw3.lib(window.obj)" lub w pozycji ""; obiekt zostanie skonsolidowany bez informacji debugowania
-glfw3.lib(context.obj) : warning LNK4099: nie znaleziono pliku PDB "" z elementem "glfw3.lib(context.obj)" lub w pozycji ""; obiekt zostanie skonsolidowany bez informacji debugowania
-glfw3.lib(input.obj) : warning LNK4099: nie znaleziono pliku PDB "" z elementem "glfw3.lib(input.obj)" lub w pozycji ""; obiekt zostanie skonsolidowany bez informacji debugowania
-glfw3.lib(win32_time.obj) : warning LNK4099: nie znaleziono pliku PDB "" z elementem "glfw3.lib(win32_time.obj)" lub w pozycji ""; obiekt zostanie skonsolidowany bez informacji debugowania
-glfw3.lib(win32_thread.obj) : warning LNK4099: nie znaleziono pliku PDB "" z elementem "glfw3.lib(win32_thread.obj)" lub w pozycji ""; obiekt zostanie skonsolidowany bez informacji debugowania
-glfw3.lib(platform.obj) : warning LNK4099: nie znaleziono pliku PDB "" z elementem "glfw3.lib(platform.obj)" lub w pozycji ""; obiekt zostanie skonsolidowany bez informacji debugowania
-glfw3.lib(monitor.obj) : warning LNK4099: nie znaleziono pliku PDB "" z elementem "glfw3.lib(monitor.obj)" lub w pozycji ""; obiekt zostanie skonsolidowany bez informacji debugowania
-glfw3.lib(vulkan.obj) : warning LNK4099: nie znaleziono pliku PDB "" z elementem "glfw3.lib(vulkan.obj)" lub w pozycji ""; obiekt zostanie skonsolidowany bez informacji debugowania
-glfw3.lib(win32_init.obj) : warning LNK4099: nie znaleziono pliku PDB "" z elementem "glfw3.lib(win32_init.obj)" lub w pozycji ""; obiekt zostanie skonsolidowany bez informacji debugowania
-glfw3.lib(null_init.obj) : warning LNK4099: nie znaleziono pliku PDB "" z elementem "glfw3.lib(null_init.obj)" lub w pozycji ""; obiekt zostanie skonsolidowany bez informacji debugowania
-glfw3.lib(win32_module.obj) : warning LNK4099: nie znaleziono pliku PDB "" z elementem "glfw3.lib(win32_module.obj)" lub w pozycji ""; obiekt zostanie skonsolidowany bez informacji debugowania
-glfw3.lib(win32_monitor.obj) : warning LNK4099: nie znaleziono pliku PDB "" z elementem "glfw3.lib(win32_monitor.obj)" lub w pozycji ""; obiekt zostanie skonsolidowany bez informacji debugowania
-glfw3.lib(win32_window.obj) : warning LNK4099: nie znaleziono pliku PDB "" z elementem "glfw3.lib(win32_window.obj)" lub w pozycji ""; obiekt zostanie skonsolidowany bez informacji debugowania
-glfw3.lib(win32_joystick.obj) : warning LNK4099: nie znaleziono pliku PDB "" z elementem "glfw3.lib(win32_joystick.obj)" lub w pozycji ""; obiekt zostanie skonsolidowany bez informacji debugowania
-glfw3.lib(wgl_context.obj) : warning LNK4099: nie znaleziono pliku PDB "" z elementem "glfw3.lib(wgl_context.obj)" lub w pozycji ""; obiekt zostanie skonsolidowany bez informacji debugowania
-glfw3.lib(egl_context.obj) : warning LNK4099: nie znaleziono pliku PDB "" z elementem "glfw3.lib(egl_context.obj)" lub w pozycji ""; obiekt zostanie skonsolidowany bez informacji debugowania
-glfw3.lib(osmesa_context.obj) : warning LNK4099: nie znaleziono pliku PDB "" z elementem "glfw3.lib(osmesa_context.obj)" lub w pozycji ""; obiekt zostanie skonsolidowany bez informacji debugowania
-glfw3.lib(null_monitor.obj) : warning LNK4099: nie znaleziono pliku PDB "" z elementem "glfw3.lib(null_monitor.obj)" lub w pozycji ""; obiekt zostanie skonsolidowany bez informacji debugowania
-glfw3.lib(null_window.obj) : warning LNK4099: nie znaleziono pliku PDB "" z elementem "glfw3.lib(null_window.obj)" lub w pozycji ""; obiekt zostanie skonsolidowany bez informacji debugowania
-glfw3.lib(null_joystick.obj) : warning LNK4099: nie znaleziono pliku PDB "" z elementem "glfw3.lib(null_joystick.obj)" lub w pozycji ""; obiekt zostanie skonsolidowany bez informacji debugowania
+﻿  LINK : nie znaleziono elementu C:\Users\Korne\OneDrive\Pulpit\Programowanie_obiektowe_projekt\Wizualizacja_ramienia_robota\x64\Debug\Wizualizacja_ramienia_robota.exe ani nie został on skompilowany podczas ostatniego konsolidowania przyrostowego; zostanie wykonana pełna konsolidacja
+glfw3.lib(init.obj) : warning LNK4099: nie znaleziono pliku PDB „” z elementem „glfw3.lib(init.obj)” lub w pozycji „”; obiekt zostanie skonsolidowany bez informacji debugowania
+glfw3.lib(window.obj) : warning LNK4099: nie znaleziono pliku PDB „” z elementem „glfw3.lib(window.obj)” lub w pozycji „”; obiekt zostanie skonsolidowany bez informacji debugowania
+glfw3.lib(context.obj) : warning LNK4099: nie znaleziono pliku PDB „” z elementem „glfw3.lib(context.obj)” lub w pozycji „”; obiekt zostanie skonsolidowany bez informacji debugowania
+glfw3.lib(input.obj) : warning LNK4099: nie znaleziono pliku PDB „” z elementem „glfw3.lib(input.obj)” lub w pozycji „”; obiekt zostanie skonsolidowany bez informacji debugowania
+glfw3.lib(win32_time.obj) : warning LNK4099: nie znaleziono pliku PDB „” z elementem „glfw3.lib(win32_time.obj)” lub w pozycji „”; obiekt zostanie skonsolidowany bez informacji debugowania
+glfw3.lib(win32_thread.obj) : warning LNK4099: nie znaleziono pliku PDB „” z elementem „glfw3.lib(win32_thread.obj)” lub w pozycji „”; obiekt zostanie skonsolidowany bez informacji debugowania
+glfw3.lib(platform.obj) : warning LNK4099: nie znaleziono pliku PDB „” z elementem „glfw3.lib(platform.obj)” lub w pozycji „”; obiekt zostanie skonsolidowany bez informacji debugowania
+glfw3.lib(monitor.obj) : warning LNK4099: nie znaleziono pliku PDB „” z elementem „glfw3.lib(monitor.obj)” lub w pozycji „”; obiekt zostanie skonsolidowany bez informacji debugowania
+glfw3.lib(vulkan.obj) : warning LNK4099: nie znaleziono pliku PDB „” z elementem „glfw3.lib(vulkan.obj)” lub w pozycji „”; obiekt zostanie skonsolidowany bez informacji debugowania
+glfw3.lib(win32_init.obj) : warning LNK4099: nie znaleziono pliku PDB „” z elementem „glfw3.lib(win32_init.obj)” lub w pozycji „”; obiekt zostanie skonsolidowany bez informacji debugowania
+glfw3.lib(null_init.obj) : warning LNK4099: nie znaleziono pliku PDB „” z elementem „glfw3.lib(null_init.obj)” lub w pozycji „”; obiekt zostanie skonsolidowany bez informacji debugowania
+glfw3.lib(win32_module.obj) : warning LNK4099: nie znaleziono pliku PDB „” z elementem „glfw3.lib(win32_module.obj)” lub w pozycji „”; obiekt zostanie skonsolidowany bez informacji debugowania
+glfw3.lib(win32_monitor.obj) : warning LNK4099: nie znaleziono pliku PDB „” z elementem „glfw3.lib(win32_monitor.obj)” lub w pozycji „”; obiekt zostanie skonsolidowany bez informacji debugowania
+glfw3.lib(win32_window.obj) : warning LNK4099: nie znaleziono pliku PDB „” z elementem „glfw3.lib(win32_window.obj)” lub w pozycji „”; obiekt zostanie skonsolidowany bez informacji debugowania
+glfw3.lib(win32_joystick.obj) : warning LNK4099: nie znaleziono pliku PDB „” z elementem „glfw3.lib(win32_joystick.obj)” lub w pozycji „”; obiekt zostanie skonsolidowany bez informacji debugowania
+glfw3.lib(wgl_context.obj) : warning LNK4099: nie znaleziono pliku PDB „” z elementem „glfw3.lib(wgl_context.obj)” lub w pozycji „”; obiekt zostanie skonsolidowany bez informacji debugowania
+glfw3.lib(egl_context.obj) : warning LNK4099: nie znaleziono pliku PDB „” z elementem „glfw3.lib(egl_context.obj)” lub w pozycji „”; obiekt zostanie skonsolidowany bez informacji debugowania
+glfw3.lib(osmesa_context.obj) : warning LNK4099: nie znaleziono pliku PDB „” z elementem „glfw3.lib(osmesa_context.obj)” lub w pozycji „”; obiekt zostanie skonsolidowany bez informacji debugowania
+glfw3.lib(null_monitor.obj) : warning LNK4099: nie znaleziono pliku PDB „” z elementem „glfw3.lib(null_monitor.obj)” lub w pozycji „”; obiekt zostanie skonsolidowany bez informacji debugowania
+glfw3.lib(null_window.obj) : warning LNK4099: nie znaleziono pliku PDB „” z elementem „glfw3.lib(null_window.obj)” lub w pozycji „”; obiekt zostanie skonsolidowany bez informacji debugowania
+glfw3.lib(null_joystick.obj) : warning LNK4099: nie znaleziono pliku PDB „” z elementem „glfw3.lib(null_joystick.obj)” lub w pozycji „”; obiekt zostanie skonsolidowany bez informacji debugowania
   Wizualizacja_ramienia_robota.vcxproj -> C:\Users\Korne\OneDrive\Pulpit\Programowanie_obiektowe_projekt\Wizualizacja_ramienia_robota\x64\Debug\Wizualizacja_ramienia_robota.exe
