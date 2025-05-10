@@ -1,11 +1,13 @@
 #include<iostream>
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
+#include<stb/stb_image.h>
 
 #include"EBO.h"
 #include"shaderClass.h"
 #include"VAO.h"
 #include"VBO.h"
+#include"Texture.h"
 
 const GLuint WIDTH = 800, HEIGHT = 800;
 
@@ -26,11 +28,11 @@ int main()
 	// Vertices coordinates
 	// Vertices coordinates
 	GLfloat vertices[] =
-	{ //               COORDINATES                  /     COLORS           //
-		-0.5f, -0.5f, 0.0f,     1.0f, 0.0f,  0.0f, // Lower left corner
-		 0.5f, -0.5f, 0.0f,     0.0f, 1.0f,  0.0f, // Lower right corner
-		 0.5f,  0.5f, 0.0f,    0.0f, 0.0f,  1.0f, // Upper corner
-		-0.5f, 0.5f, 0.0f,     1.0f, 1.0f, 1.0f, // Inner left
+	{ //     COORDINATES       /     COLORS     //
+		-0.5f, -0.5f, 0.0f,     0.0f, 0.0f,  0.0f,	1.0f, 0.0f,			// Lower left corner
+		 0.5f, -0.5f, 0.0f,     0.0f, 0.0f,  0.0f,  0.0f, 0.0f,// Lower right corner
+		 0.5f,  0.5f, 0.0f,    0.0f, 0.0f,  0.0f,	0.0f, 1.0f,// Upper corner
+		-0.5f, 0.5f, 0.0f,     0.0f, 0.0f, 0.0f,	1.0f, 1.0f// Inner left
 		 
 	};
 
@@ -68,15 +70,21 @@ int main()
 	VBO VBO1(vertices, sizeof(vertices));
 	EBO EBO1(indices, sizeof(indices));
 
-	VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 6 * sizeof(float), (void*)0);
-	VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 6 * sizeof(float), (void*)(3*sizeof(float)));
+	VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+	VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3*sizeof(float)));
+	VAO1.LinkAttrib(VBO1, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	VAO1.Unbind();
 	VBO1.Unbind();
 	EBO1.Unbind();
 
 	GLuint uniID = glGetUniformLocation(shaderProgram.ID, "scale");
 
-	
+
+	//Texture
+	Texture zaloga("zaloga.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+	zaloga.texUnit(shaderProgram,"tex0", 0);
+
+
 	glfwSwapBuffers(window);
 	
 	while (!glfwWindowShouldClose(window))
@@ -86,6 +94,7 @@ int main()
 		
 		shaderProgram.Activate();
 		glUniform1f(uniID, 0.5f);
+		zaloga.Bind();
 		VAO1.Bind();
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glfwSwapBuffers(window);
@@ -96,6 +105,7 @@ int main()
 	VAO1.Delete();
 	VBO1.Delete();
 	EBO1.Delete();
+	zaloga.Delete();
 	shaderProgram.Delete();
 
 	//zamkniecie okna kuniec
