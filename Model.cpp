@@ -50,8 +50,17 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
             mesh->mVertices[i].y,
             mesh->mVertices[i].z
         );
-        // Brak normalnych – przypisujemy sta³y kolor (bia³y lub losowy)
-        vertex.color = glm::vec3(1.0f, 1.0f, 1.0f);
+        if (mesh->HasVertexColors(0)) {
+            vertex.color = glm::vec3(
+                mesh->mColors[0][i].r,
+                mesh->mColors[0][i].g,
+                mesh->mColors[0][i].b
+            );
+        }
+        else {
+            vertex.color = glm::vec3(1.0f); // fallback
+        }
+
 
         // Jeœli UV istniej¹
         if (mesh->mTextureCoords[0]) {
@@ -91,6 +100,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
         aiString str;
         mat->GetTexture(type, i, &str);
         std::string texPath = directory + "/" + std::string(str.C_Str());
+        std::cout << "Trying to load texture: " << texPath << std::endl;
 
         Texture texture(texPath.c_str(), typeName.c_str(), GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
         textures.push_back(texture);

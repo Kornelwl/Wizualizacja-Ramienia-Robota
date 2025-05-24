@@ -14,6 +14,9 @@
 #include"Mesh.h"
 #include"Model.h"
 
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void processInput(GLFWwindow* window);
+
 
 const GLuint WIDTH = 800, HEIGHT = 800;
 
@@ -61,7 +64,10 @@ int main()
 	glfwMakeContextCurrent(window);
 	//Viewport settings
 	gladLoadGL();
-	glViewport(0,0,800,800);
+
+	glViewport(0,0,WIDTH,HEIGHT);
+	//Resizing viewport 
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	Texture textures[]{
 		//Texture
@@ -76,6 +82,8 @@ int main()
 	-Obiekt, który zapamiêtuje ustawienia bindowania VBO i atrybutów wierzcho³ków.
 	-Dziêki VAO nie musisz ka¿dorazowo ustawiaæ glVertexAttribPointer.*/
 	Shader shaderProgram("default.vert", "default.frag");
+	Shader robotShader("robot_arm.vert", "robot_arm.frag");
+
 
 	std::vector <Vertex> verts(vertices, vertices + sizeof(vertices) / sizeof(Vertex));
 	std::vector <GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
@@ -91,23 +99,32 @@ int main()
 	//DO zobaczenia siatki czy model sie zaladowa³
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-
+	//Rendering window, swaping buffers so window is not flickery
 	glfwSwapBuffers(window);
+
+	
 	
 	while (!glfwWindowShouldClose(window))
 	{
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		//Input
+		processInput(window);
+		glClearColor(0.27f, 0.55f, 0.35f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
 		// macierz 4x4 dodanie lokalizacji modelu i viewportu gdzie ma sie wyswietlac, i dodanie perspective - perspektywa, punkt widzenia na obrazie, w tym przypadku mamy 45 stopni
+
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(1.0f)); 
+		model = glm::scale(model, glm::vec3(1.0f));
 
 		glm::mat4 view = glm::mat4(1.0f);
 		glm::mat4 proj = glm::mat4(1.0f);
-		view = glm::translate(view, glm::vec3(0.0f, -1.0f, -6.0f));
-		proj = glm::perspective(glm::radians(45.0f), (float)(WIDTH/HEIGHT), 0.1f, 100.0f);
+		view = glm::lookAt(
+			glm::vec3(0.0f, 2.0f, 5.0f), // pozycja kamery (wy¿ej i dalej)
+			glm::vec3(0.0f, 0.0f, 0.0f), // patrz na œrodek sceny
+			glm::vec3(0.0f, 1.0f, 0.0f)  // „góra” sceny
+		);
+
+		proj = glm::perspective(glm::radians(45.0f), (float)(WIDTH / HEIGHT), 0.1f, 100.0f);
 
 		int modelLoc = glGetUniformLocation(shaderProgram.ID, "model");
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -115,16 +132,20 @@ int main()
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		int projLoc = glGetUniformLocation(shaderProgram.ID, "proj");
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
-
-		// floor (pozostaje p³aski)
-		// Dla pod³ogi
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		// floor
 		floor.Draw(shaderProgram);
 
 		// Dla robota
-		glm::mat4 robotModelMatrix = glm::mat4(1.0f);
-		robotModelMatrix = glm::scale(robotModelMatrix, glm::vec3(0.1f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(robotModelMatrix));
+		glm::mat4 model_robot = glm::mat4(1.0f);
+		model_robot = glm::translate(model_robot, glm::vec3(0.0f, 0.0f, 0.0f));
+		model_robot = glm::scale(model_robot, glm::vec3(0.1f));
+
+		int modelLoc_robot = glGetUniformLocation(robotShader.ID, "model");
+		glUniformMatrix4fv(modelLoc_robot, 1, GL_FALSE, glm::value_ptr(model_robot));
+		int viewLoc_robot = glGetUniformLocation(robotShader.ID, "view");
+		glUniformMatrix4fv(viewLoc_robot, 1, GL_FALSE, glm::value_ptr(view));
+		int projLoc_robot = glGetUniformLocation(robotShader.ID, "proj");
+		glUniformMatrix4fv(projLoc_robot, 1, GL_FALSE, glm::value_ptr(proj));
 		robotModel.Draw(shaderProgram);
 
 		glfwSwapBuffers(window);
@@ -133,10 +154,22 @@ int main()
 
 	//usuwanie obiektow po zakonczeniu programu
 	shaderProgram.Delete();
+	robotShader.Delete();
 
 	//zamkniecie okna kuniec
 	std::cout << "Exiting program" << std::endl;
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;
+}
+//Resizing window
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+	glViewport(0, 0, width, height);
+}
+//ESC - close window
+void processInput(GLFWwindow* window)
+{
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, true);
 }

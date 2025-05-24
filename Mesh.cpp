@@ -44,5 +44,14 @@ void Mesh::Draw(Shader &shader)
 		// Draw the actual mesh
 		
 	}
+	//if (textures.empty())
+		//std::cout << "WARNING: This mesh has no textures!" << std::endl;
+
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+
+	// Odbindowanie tekstur
+	for (unsigned int i = 0; i < textures.size(); i++)
+	{
+		textures[i].Unbind();
+	}
 }
