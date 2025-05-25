@@ -71,12 +71,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\Korne\OneDrive\Pulpit\Programowanie_obiektowe_projekt\Wizualizacja_ramienia_robota\Libraries\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Korne\OneDrive\Pulpit\Programowanie_obiektowe_projekt\Wizualizacja_ramienia_robota\Libraries\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)Libraries\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)Libraries\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\Korne\OneDrive\Pulpit\Programowanie_obiektowe_projekt\Wizualizacja_ramienia_robota\Libraries\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Korne\OneDrive\Pulpit\Programowanie_obiektowe_projekt\Wizualizacja_ramienia_robota\Libraries\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)Libraries\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)Libraries\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
