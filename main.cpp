@@ -71,7 +71,7 @@ int main()
 
 	Texture textures[]{
 		//Texture
-		Texture("zaloga.png", "diffuse", GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE)
+		Texture("drewno.png", "diffuse", GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE)
 	};
 
 
