@@ -39,9 +39,9 @@ int main()
 	//Jak coœ te cordy to nie jest x, y ,z jak na matmie tylko z jest jak y i y jest jak z XD
 	Vertex vertices[] =
 	{ //     COORDINATES       /     COLORS     //    TEX2D
-		Vertex{glm::vec3(-5.0f, 0.0f, -5.0f),glm::vec3(0.0f, 0.0f,  0.0f),glm::vec2(0.0f, 1.0f)},// Lower left corner
-		Vertex{glm::vec3(5.0f, 0.0f,-5.0f), glm::vec3(0.0f, 0.0f,  0.0f), glm::vec2(1.0f, 1.0f)},// Lower right corner
-		Vertex{glm::vec3(5.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f,  0.0f), glm::vec2(1.0f, 0.0f)},// Upper corner
+		Vertex{glm::vec3(-5.0f, 0.0f, -5.0f),glm::vec3(0.0f, 0.0f,  0.0f),glm::vec2(0.0f, 2.0f)},// Lower left corner
+		Vertex{glm::vec3(5.0f, 0.0f,-5.0f), glm::vec3(0.0f, 0.0f,  0.0f), glm::vec2(2.0f, 2.0f)},// Lower right corner
+		Vertex{glm::vec3(5.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f,  0.0f), glm::vec2(2.0f, 0.0f)},// Upper corner
 		Vertex{glm::vec3(-5.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f)} // Inner left
 		 
 	};
@@ -69,6 +69,7 @@ int main()
 	//Resizing viewport 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+	//Textury do pod³ogi
 	Texture textures[]{
 		//Texture
 		Texture("drewno.png", "diffuse", GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE)
@@ -138,7 +139,7 @@ int main()
 		// Dla robota
 		glm::mat4 model_robot = glm::mat4(1.0f);
 		model_robot = glm::translate(model_robot, glm::vec3(0.0f, 0.0f, 0.0f));
-		model_robot = glm::scale(model_robot, glm::vec3(0.1f));
+		model_robot = glm::scale(model_robot, glm::vec3(0.2f));
 
 		int modelLoc_robot = glGetUniformLocation(robotShader.ID, "model");
 		glUniformMatrix4fv(modelLoc_robot, 1, GL_FALSE, glm::value_ptr(model_robot));

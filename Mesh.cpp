@@ -40,8 +40,6 @@ void Mesh::Draw(Shader &shader)
 		}
 		textures[i].texUnit(shader, (type + num).c_str(), i);
 		textures[i].Bind();
-
-		// Draw the actual mesh
 		
 	}
 	//if (textures.empty())

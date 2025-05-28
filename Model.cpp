@@ -22,7 +22,12 @@ void Model::loadModel(const std::string& path) {
         return;
     }
 
-    directory = path.substr(0, path.find_last_of("/\\"));
+    size_t slash = path.find_last_of("/\\");
+    directory = (slash != std::string::npos) ? path.substr(0, slash) : ".";
+    std::cout << "[INFO] £adowanie modelu z: " << path << std::endl;
+    std::cout << "[INFO] Katalog tekstur ustawiony na: " << directory << std::endl;
+
+
     processNode(scene->mRootNode, scene);
 }
 
@@ -100,6 +105,14 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
         aiString str;
         mat->GetTexture(type, i, &str);
         std::string texPath = directory + "/" + std::string(str.C_Str());
+        std::ifstream texFile(texPath);
+        if (!texFile.good()) {
+            std::cerr << "[WARNING] Nie znaleziono tekstury: " << texPath << std::endl;
+        }
+        else {
+            std::cout << "[INFO] Znaleziono teksturê: " << texPath << std::endl;
+        }
+
         std::cout << "Trying to load texture: " << texPath << std::endl;
 
         Texture texture(texPath.c_str(), typeName.c_str(), GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
