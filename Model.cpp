@@ -24,6 +24,7 @@ void Model::loadModel(const std::string& path) {
 
     size_t slash = path.find_last_of("/\\");
     directory = (slash != std::string::npos) ? path.substr(0, slash) : ".";
+
     std::cout << "[INFO] £adowanie modelu z: " << path << std::endl;
     std::cout << "[INFO] Katalog tekstur ustawiony na: " << directory << std::endl;
 

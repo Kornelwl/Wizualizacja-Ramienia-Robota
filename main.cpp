@@ -84,13 +84,14 @@ int main()
 	-Obiekt, który zapamiêtuje ustawienia bindowania VBO i atrybutów wierzcho³ków.
 	-Dziêki VAO nie musisz ka¿dorazowo ustawiaæ glVertexAttribPointer.*/
 	Shader shaderProgram("default.vert", "default.frag");
+	Shader robotshader("robot_arm.vert", "robot_arm.frag");
 
 	std::vector <Vertex> verts(vertices, vertices + sizeof(vertices) / sizeof(Vertex));
 	std::vector <GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
 	std::vector <Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
 	// Create floor mesh
 	Mesh floor(verts, ind, tex);
-	Model robotModel((char*)"Ramie_robota1.glb");
+	Model robotModel((char*)"Ramie_robota_pokolorowane_wiercholki.glb");
 	
 
 	GLuint uniID = glGetUniformLocation(shaderProgram.ID, "scale");
@@ -117,13 +118,14 @@ int main()
 		glm::mat4 view = glm::mat4(1.0f);
 		glm::mat4 proj = glm::mat4(1.0f);
 		view = glm::lookAt(
-			glm::vec3(0.0f, 2.0f, 5.0f), // pozycja kamery (wy¿ej i dalej)
+			glm::vec3(0.0f, 2.0f, -5.0f), // pozycja kamery (wy¿ej i dalej)
 			glm::vec3(0.0f, 0.0f, 0.0f), // patrz na œrodek sceny
 			glm::vec3(0.0f, 1.0f, 0.0f)  // „góra” sceny
 		);
 
 		proj = glm::perspective(glm::radians(45.0f), (float)(WIDTH / HEIGHT), 0.1f, 100.0f);
 
+		shaderProgram.Activate();
 		int modelLoc = glGetUniformLocation(shaderProgram.ID, "model");
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		int viewLoc = glGetUniformLocation(shaderProgram.ID, "view");
@@ -137,12 +139,14 @@ int main()
 		glm::mat4 model_robot = glm::mat4(1.0f);
 		model_robot = glm::translate(model_robot, glm::vec3(0.0f, 0.0f, 0.0f));
 		model_robot = glm::scale(model_robot, glm::vec3(0.2f));
-
-		int modelLoc_robot = glGetUniformLocation(shaderProgram.ID, "model");
+		robotshader.Activate();
+		int modelLoc_robot = glGetUniformLocation(robotshader.ID, "model");
 		glUniformMatrix4fv(modelLoc_robot, 1, GL_FALSE, glm::value_ptr(model_robot));
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
-		robotModel.Draw(shaderProgram);
+		int viewLoc_robot = glGetUniformLocation(robotshader.ID, "view");
+		glUniformMatrix4fv(viewLoc_robot, 1, GL_FALSE, glm::value_ptr(view));
+		int projLoc_robot = glGetUniformLocation(robotshader.ID, "proj");
+		glUniformMatrix4fv(projLoc_robot, 1, GL_FALSE, glm::value_ptr(proj));
+		robotModel.Draw(robotshader);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents(); // obs³uga zdarzeñ (klawiatura, mysz, ...)
@@ -150,6 +154,7 @@ int main()
 
 	//usuwanie obiektow po zakonczeniu programu
 	shaderProgram.Delete();
+	robotshader.Delete();
 
 	//zamkniecie okna kuniec
 	std::cout << "Exiting program" << std::endl;
