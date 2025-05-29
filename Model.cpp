@@ -46,7 +46,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     std::vector<Vertex> vertices;
     std::vector<GLuint> indices;
     std::vector<Texture> textures;
-
+    int coloredVertexCount = 0;
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
         Vertex vertex;
 
@@ -61,6 +61,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
                 mesh->mColors[0][i].g,
                 mesh->mColors[0][i].b
             );
+            coloredVertexCount++;
         }
         else {
             vertex.color = glm::vec3(1.0f); // fallback
@@ -79,6 +80,12 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         }
 
         vertices.push_back(vertex);
+    }
+    if (coloredVertexCount > 0) {
+        std::cout << "[INFO] Siatka zawiera kolory wierzcho³ków (" << coloredVertexCount << " z " << mesh->mNumVertices << ")\n";
+    }
+    else {
+        std::cout << "[INFO] Brak kolorów wierzcho³ków – u¿ywany fallback (bia³y)\n";
     }
 
     for (unsigned int i = 0; i < mesh->mNumFaces; i++) {

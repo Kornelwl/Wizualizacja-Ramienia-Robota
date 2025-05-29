@@ -64,6 +64,7 @@ int main()
 	glfwMakeContextCurrent(window);
 	//Viewport settings
 	gladLoadGL();
+	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
 
 	glViewport(0,0,WIDTH,HEIGHT);
 	//Resizing viewport 
@@ -83,8 +84,6 @@ int main()
 	-Obiekt, który zapamiêtuje ustawienia bindowania VBO i atrybutów wierzcho³ków.
 	-Dziêki VAO nie musisz ka¿dorazowo ustawiaæ glVertexAttribPointer.*/
 	Shader shaderProgram("default.vert", "default.frag");
-	Shader robotShader("robot_arm.vert", "robot_arm.frag");
-
 
 	std::vector <Vertex> verts(vertices, vertices + sizeof(vertices) / sizeof(Vertex));
 	std::vector <GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
@@ -102,8 +101,6 @@ int main()
 
 	//Rendering window, swaping buffers so window is not flickery
 	glfwSwapBuffers(window);
-
-	
 	
 	while (!glfwWindowShouldClose(window))
 	{
@@ -141,12 +138,10 @@ int main()
 		model_robot = glm::translate(model_robot, glm::vec3(0.0f, 0.0f, 0.0f));
 		model_robot = glm::scale(model_robot, glm::vec3(0.2f));
 
-		int modelLoc_robot = glGetUniformLocation(robotShader.ID, "model");
+		int modelLoc_robot = glGetUniformLocation(shaderProgram.ID, "model");
 		glUniformMatrix4fv(modelLoc_robot, 1, GL_FALSE, glm::value_ptr(model_robot));
-		int viewLoc_robot = glGetUniformLocation(robotShader.ID, "view");
-		glUniformMatrix4fv(viewLoc_robot, 1, GL_FALSE, glm::value_ptr(view));
-		int projLoc_robot = glGetUniformLocation(robotShader.ID, "proj");
-		glUniformMatrix4fv(projLoc_robot, 1, GL_FALSE, glm::value_ptr(proj));
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
 		robotModel.Draw(shaderProgram);
 
 		glfwSwapBuffers(window);
@@ -155,7 +150,6 @@ int main()
 
 	//usuwanie obiektow po zakonczeniu programu
 	shaderProgram.Delete();
-	robotShader.Delete();
 
 	//zamkniecie okna kuniec
 	std::cout << "Exiting program" << std::endl;
