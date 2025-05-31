@@ -30,6 +30,11 @@ bool firstMouse = true;
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
+//rotation for arms
+float rotationBaseAngle = 0.0f;
+float rotationArm2Angle = 0.0f;
+float rotationArm3Angle = 0.0f;
+
 int main()
 {
 	std::cout << "Starting GLFW context, OpenGL 3.4" << std::endl;
@@ -116,6 +121,16 @@ int main()
 
 	//Rendering window, swaping buffers so window is not flickery
 	glfwSwapBuffers(window);
+
+	//Setting for model_robot
+	Node* BaseNode = robotModel.findNodeByName(robotModel.rootNode, "Base");
+	if (BaseNode) {
+		BaseNode->transformation = glm::mat4(1.0f);
+		BaseNode->transformation = glm::scale(
+			BaseNode->transformation,
+			glm::vec3(0.2f)
+		);
+	}
 	
 	while (!glfwWindowShouldClose(window))
 	{
@@ -148,13 +163,31 @@ int main()
 		// floor
 		floor.Draw(shaderProgram);
 
-		// Dla robota
-		glm::mat4 model_robot = glm::mat4(1.0f);
-		model_robot = glm::translate(model_robot, glm::vec3(0.0f, 0.0f, 0.0f));
-		model_robot = glm::scale(model_robot, glm::vec3(0.2f));
+		//robot
+		//Baserotator movement
+		Node* Baserotator = robotModel.findNodeByName(robotModel.rootNode, "Base_rotator");
+		if (Baserotator) {
+			Baserotator->transformation = glm::mat4(1.0f);
+			Baserotator->transformation = glm::rotate(
+				Baserotator->transformation,
+				glm::radians(rotationBaseAngle),
+				glm::vec3(0.0f,1.0f,0.0f)
+			);
+		}
+		//arm2 movement
+		Node* Arm2 = robotModel.findNodeByName(robotModel.rootNode, "Arm2");
+		if (Arm2) {
+			Arm2->transformation = glm::mat4(1.0f);
+			Arm2->transformation = glm::rotate(
+				Arm2->transformation,
+				glm::radians(rotationArm2Angle),
+				glm::vec3(0.0f, 0.0f, 1.0f)
+			);
+		}
+		//arm3 movement
+		
+
 		robotshader.Activate();
-		int modelLoc_robot = glGetUniformLocation(robotshader.ID, "model");
-		glUniformMatrix4fv(modelLoc_robot, 1, GL_FALSE, glm::value_ptr(model_robot));
 		int viewLoc_robot = glGetUniformLocation(robotshader.ID, "view");
 		glUniformMatrix4fv(viewLoc_robot, 1, GL_FALSE, glm::value_ptr(view));
 		int projLoc_robot = glGetUniformLocation(robotshader.ID, "proj");
@@ -194,6 +227,21 @@ void processInput(GLFWwindow* window)
 		camera.ProcessKeyboard(LEFT, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera.ProcessKeyboard(RIGHT, deltaTime);
+
+	//Robot positions
+	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+		rotationBaseAngle += 25.0f*deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+		rotationBaseAngle -= 25.0f*deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+		rotationArm2Angle += 25.0f * deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
+		rotationArm2Angle -= 25.0f * deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
+		rotationArm3Angle += 25.0f * deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS)
+		rotationArm3Angle -= 25.0f * deltaTime;
+		
 }
 
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)

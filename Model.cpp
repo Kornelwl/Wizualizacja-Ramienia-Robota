@@ -6,8 +6,7 @@ Model::Model(const std::string& path) {
 }
 
 void Model::Draw(Shader& shader) {
-    for (unsigned int i = 0; i < meshes.size(); i++)
-        meshes[i].Draw(shader);
+    drawNode(rootNode, shader, glm::mat4(1.0f));
 }
 
 void Model::loadModel(const std::string& path) {
@@ -29,18 +28,28 @@ void Model::loadModel(const std::string& path) {
     std::cout << "[INFO] Katalog tekstur ustawiony na: " << directory << std::endl;
 
 
-    processNode(scene->mRootNode, scene);
+    rootNode = processNode(scene->mRootNode, scene);
+
 }
 
-void Model::processNode(aiNode* node, const aiScene* scene) {
+Node Model::processNode(aiNode* node, const aiScene* scene) {
+    Node newNode;
+    newNode.name = node->mName.C_Str();
+
+    aiMatrix4x4 transform = node->mTransformation;
+    glm::mat4 glmTransform = glm::transpose(glm::make_mat4(&transform.a1));
+    newNode.transformation = glmTransform;
+
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        meshes.push_back(processMesh(mesh, scene));
+        newNode.meshes.push_back(processMesh(mesh, scene));
     }
 
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
-        processNode(node->mChildren[i], scene);
+        newNode.children.push_back(processNode(node->mChildren[i], scene));
     }
+
+    return newNode;
 }
 
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
@@ -128,4 +137,33 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
     }
 
     return textures;
+}
+
+void Model::drawNode(Node& node, Shader& shader, glm::mat4 parentTransform) {
+    glm::mat4 globalTransform = parentTransform * node.transformation;
+
+    shader.Activate();
+    GLint modelLoc = glGetUniformLocation(shader.ID, "model");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(globalTransform));
+
+    for (auto& mesh : node.meshes) {
+        mesh.Draw(shader);
+    }
+
+    for (auto& child : node.children) {
+        drawNode(child, shader, globalTransform);
+    }
+}
+
+Node* Model::findNodeByName(Node& node, const std::string& name) {
+    if (node.name == name)
+        return &node;
+
+    for (auto& child : node.children) {
+        Node* found = findNodeByName(child, name);
+        if (found)
+            return found;
+    }
+    std::cout << "Nie znaleziono wêz³a" << std::endl;
+    return nullptr;
 }
