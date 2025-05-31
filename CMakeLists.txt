@@ -13,6 +13,7 @@ add_executable(${PROJECT_NAME}
     VAO.cpp
     EBO.cpp
     stb.cpp
+    Camera.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
