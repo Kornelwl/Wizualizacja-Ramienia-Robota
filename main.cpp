@@ -34,6 +34,7 @@ float lastFrame = 0.0f; // Time of last frame
 float rotationBaseAngle = 0.0f;
 float rotationArm2Angle = 0.0f;
 float rotationArm3Angle = 0.0f;
+float grabber_movement = 0.0f;
 
 int main()
 {
@@ -195,6 +196,24 @@ int main()
 			);
 		}
 
+		//grabber movement
+		Node* grabber1 = robotModel.findNodeByName(robotModel.rootNode, "Grabber1");
+		if (grabber1) {
+			grabber1->transformation = glm::mat4(1.0f);
+			grabber1->transformation = glm::translate(
+				grabber1->transformation,
+				glm::vec3(0.0f, 0.0f, grabber_movement)
+			);
+		}
+		Node* grabber2 = robotModel.findNodeByName(robotModel.rootNode, "Grabber2");
+		if (grabber2) {
+			grabber2->transformation = glm::mat4(1.0f);
+			grabber2->transformation = glm::translate(
+				grabber2->transformation,
+				glm::vec3(0.0f, 0.0f, -2.0f * grabber_movement)  // ruch przeciwny
+			);
+		}
+
 		robotshader.Activate();
 		int viewLoc_robot = glGetUniformLocation(robotshader.ID, "view");
 		glUniformMatrix4fv(viewLoc_robot, 1, GL_FALSE, glm::value_ptr(view));
@@ -245,10 +264,14 @@ void processInput(GLFWwindow* window)
 		rotationArm2Angle += 25.0f * deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
 		rotationArm2Angle -= 25.0f * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 		rotationArm3Angle += 25.0f * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
 		rotationArm3Angle -= 25.0f * deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
+		grabber_movement += 1.0f * deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
+		grabber_movement -= 1.0f * deltaTime;
 		
 }
 
