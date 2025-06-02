@@ -74,7 +74,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
             coloredVertexCount++;
         }
         else {
-            vertex.color = glm::vec3(1.0f); // fallback
+            vertex.color = glm::vec3(0.5f,0.5f,0.5f); // szary kolor jak sie nie wczytaja kolory
         }
 
 

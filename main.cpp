@@ -110,7 +110,7 @@ int main()
 	std::vector <Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
 	// Create floor mesh
 	Mesh floor(verts, ind, tex);
-	Model robotModel((char*)"Ramie_robota_pokolorowane_wiercholki.glb");
+	Model robotModel((char*)"Ramie_robota_poprawa.glb");
 	
 
 	GLuint uniID = glGetUniformLocation(shaderProgram.ID, "scale");
@@ -185,7 +185,15 @@ int main()
 			);
 		}
 		//arm3 movement
-		
+		Node* Arm3 = robotModel.findNodeByName(robotModel.rootNode, "Arm3");
+		if (Arm3) {
+			Arm3->transformation = glm::mat4(1.0f);
+			Arm3->transformation = glm::rotate(
+				Arm3->transformation,
+				glm::radians(rotationArm3Angle),
+				glm::vec3(0.0f, 0.0f, 1.0f)
+			);
+		}
 
 		robotshader.Activate();
 		int viewLoc_robot = glGetUniformLocation(robotshader.ID, "view");
