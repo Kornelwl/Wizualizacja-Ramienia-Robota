@@ -269,9 +269,9 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
 		rotationArm3Angle -= 25.0f * deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
-		grabber_movement += 1.0f * deltaTime;
+		grabber_movement += 0.5f * deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
-		grabber_movement -= 1.0f * deltaTime;
+		grabber_movement -= 0.5f * deltaTime;
 		
 }
 
