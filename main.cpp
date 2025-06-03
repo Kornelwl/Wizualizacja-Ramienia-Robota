@@ -43,6 +43,19 @@ float grabber_location = 0.0f;
 float grabberlink_location_x = 0.0f;
 float grabberlink_location_y = 0.0f;
 float grabberlink_location_z = 0.0f;
+float arm3_location_x = 0.0f;
+float arm3_location_y = 0.0f;
+float arm3_location_z = 0.0f;
+
+// Rotation limits (in degrees)
+const float BASE_ROT_MIN = -180.0f;
+const float BASE_ROT_MAX = 180.0f;
+
+const float ARM2_ROT_MIN = -60.0f;
+const float ARM2_ROT_MAX = 30.0f;
+
+const float ARM3_ROT_MIN = -30.0f;
+const float ARM3_ROT_MAX = 90.0f;
 
 
 int main()
@@ -145,6 +158,8 @@ int main()
 	float count = 0.0f;
 	glm::vec3 grabberlink_position;
 	glm::vec3 grabberlink_position_example;
+	glm::vec3 arm3_position;
+
 
 
 	while (!glfwWindowShouldClose(window))
@@ -181,20 +196,25 @@ int main()
 		//robot
 
 		//Calculating positionas after 10000 frames
-		if (count > 10000)
-		{
-			//robotModel.printAllGlobalPositions(robotModel.rootNode, glm::mat4(1.0f));
-			grabberlink_position_example = robotModel.getGlobalPosition(robotModel.rootNode, glm::mat4(1.0f), "Grabber_link");
-			std::cout << "Pozycja grabbera x: " << grabberlink_position_example.x << std::endl << "Pozycja grabbera y: " << grabberlink_position_example.y << std::endl << "Pozycja grabbera z: " << grabberlink_position_example.z << std::endl;
-			count = 0;
-		}
-		else
-			count++;
+		//if (count > 10000)
+		//{
+		//	//robotModel.printAllGlobalPositions(robotModel.rootNode, glm::mat4(1.0f));
+		//	grabberlink_position_example = robotModel.getGlobalPosition(robotModel.rootNode, glm::mat4(1.0f), "Grabber_link");
+		//	std::cout << "Pozycja grabbera x: " << grabberlink_position_example.x << std::endl << "Pozycja grabbera y: " << grabberlink_position_example.y << std::endl << "Pozycja grabbera z: " << grabberlink_position_example.z << std::endl;
+		//	count = 0;
+		//}
+		//else
+		//	count++;
 		
 		grabberlink_position = robotModel.getGlobalPosition(robotModel.rootNode, glm::mat4(1.0f), "Grabber_link");
 		grabberlink_location_x = grabberlink_position.x;
 		grabberlink_location_y = grabberlink_position.y;
 		grabberlink_location_z = grabberlink_position.z;
+		arm3_position = robotModel.getGlobalPosition(robotModel.rootNode, glm::mat4(1.0f), "Arm3");
+		arm3_location_x = grabberlink_position.x;
+		arm3_location_y = grabberlink_position.y;
+		arm3_location_z = grabberlink_position.z;
+		std::cout << arm3_location_x << " " << arm3_location_y << " " << arm3_location_z << std::endl;
 
 		//Baserotator movement
 		Node* Baserotator = robotModel.findNodeByName(robotModel.rootNode, "Base_rotator");
@@ -289,17 +309,17 @@ void processInput(GLFWwindow* window)
 		camera.ProcessKeyboard(RIGHT, deltaTime);
 
 	//Robot positions
-	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS && rotationBaseAngle < BASE_ROT_MAX)
 		rotationBaseAngle += 25.0f*deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS && rotationBaseAngle > BASE_ROT_MIN)
 		rotationBaseAngle -= 25.0f*deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS && grabberlink_location_y <=2.2f)
+	if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS && rotationArm2Angle < ARM2_ROT_MAX)
 		rotationArm2Angle += 25.0f * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS && check_area_xz_axis(grabberlink_location_x,grabberlink_location_z) && grabberlink_location_y >=0.213f)
+	if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS && check_area_xz_axis(grabberlink_location_x,grabberlink_location_z) && grabberlink_location_y >=0.213f && rotationArm2Angle > ARM2_ROT_MIN)
 		rotationArm2Angle -= 25.0f * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS && grabberlink_location_y <=2.2f)
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS && rotationArm3Angle < ARM3_ROT_MAX)
 		rotationArm3Angle += 25.0f * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS && check_area_xz_axis(grabberlink_location_x,grabberlink_location_z) && grabberlink_location_y >= 0.213f)
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS && check_area_xz_axis(grabberlink_location_x,grabberlink_location_z) && grabberlink_location_y >= 0.213f && rotationArm3Angle > ARM3_ROT_MIN)
 		rotationArm3Angle -= 25.0f * deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && grabber_location <=0.5f)
 		grabber_movement += 0.5f * deltaTime;
