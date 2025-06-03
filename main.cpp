@@ -1,4 +1,5 @@
 #include<iostream>
+#include<fstream>
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 #include<stb/stb_image.h>
@@ -16,11 +17,26 @@
 #include"Model.h"
 #include"Camera.h"
 
+std::ifstream in;
+std::ofstream out;
+
+struct RobotFrame {
+	float timestamp;
+	float baseAngle;
+	float arm2Angle;
+	float arm3Angle;
+	float grabberMove;
+};
+
+bool isRecording = false;
+bool isPlaying = false;
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 bool check_area_xz_axis(float grabberlink_location_x, float grabberlink_location_z);
+std::vector<RobotFrame> loadSequenceFromFile(const std::string& filename);
 
 const GLuint WIDTH = 800, HEIGHT = 800;
 //zainicjowanie kamery
@@ -60,6 +76,16 @@ const float ARM3_ROT_MAX = 90.0f;
 
 int main()
 {
+	//Pozycja x i z 0.74
+	float count = 0.0f;
+	glm::vec3 grabberlink_position;
+	glm::vec3 grabberlink_position_example;
+	glm::vec3 arm3_position;
+
+	std::vector<RobotFrame> recordedFrames;
+	float playTime = 0.0f;
+	size_t playIndex = 0;
+
 	std::cout << "Starting GLFW context, OpenGL 3.4" << std::endl;
 	//Initialize library GLFW
 	if (!glfwInit())
@@ -134,6 +160,8 @@ int main()
 	// Create floor mesh
 	Mesh floor(verts, ind, tex);
 	Model robotModel((char*)"Ramie_robota_poprawa.glb");
+	//Wczytanie pliku z pozycjami robota
+	std::vector<RobotFrame> playbackFrames = loadSequenceFromFile("recording.csv");
 
 	GLuint uniID = glGetUniformLocation(shaderProgram.ID, "scale");
 
@@ -154,20 +182,43 @@ int main()
 		);
 	}
 
-	//Pozycja x i z 0.74
-	float count = 0.0f;
-	glm::vec3 grabberlink_position;
-	glm::vec3 grabberlink_position_example;
-	glm::vec3 arm3_position;
-
-
-
 	while (!glfwWindowShouldClose(window))
 	{
 		//Camera settings (calculating each frame to get smoother camera)
 		float currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
+
+		//Nagrywanie
+		if (isRecording) {
+			recordedFrames.push_back(RobotFrame{
+				currentFrame,
+				rotationBaseAngle,
+				rotationArm2Angle,
+				rotationArm3Angle,
+				grabber_movement
+				});
+		}
+		//Odtwarzanie
+		if (isPlaying && playIndex < playbackFrames.size()) {
+			RobotFrame& frame = playbackFrames[playIndex];
+			rotationBaseAngle = frame.baseAngle;
+			rotationArm2Angle = frame.arm2Angle;
+			rotationArm3Angle = frame.arm3Angle;
+			grabber_movement = frame.grabberMove;
+
+			playTime += deltaTime;
+			if (playIndex + 1 < playbackFrames.size() &&
+				playbackFrames[playIndex + 1].timestamp <= playTime)
+			{
+				playIndex++;
+			}
+			else
+			{
+				playIndex = 0;
+			}
+		}
+		
 		//Input
 		processInput(window);
 		glClearColor(0.27f, 0.55f, 0.35f, 1.0f);
@@ -282,6 +333,17 @@ int main()
 	shaderProgram.Delete();
 	robotshader.Delete();
 
+	//Saving data into file
+	std::ofstream out("recording.csv");
+	for (const auto& frame : recordedFrames) {
+		out << frame.timestamp << ","
+			<< frame.baseAngle << ","
+			<< frame.arm2Angle << ","
+			<< frame.arm3Angle << ","
+			<< frame.grabberMove << "\n";
+	}
+	out.close();
+
 	//zamkniecie okna kuniec
 	std::cout << "Exiting program" << std::endl;
 	glfwDestroyWindow(window);
@@ -309,22 +371,29 @@ void processInput(GLFWwindow* window)
 		camera.ProcessKeyboard(RIGHT, deltaTime);
 
 	//Robot positions
-	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS && rotationBaseAngle < BASE_ROT_MAX)
+	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS && rotationBaseAngle < BASE_ROT_MAX && !isPlaying)
 		rotationBaseAngle += 25.0f*deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS && rotationBaseAngle > BASE_ROT_MIN)
+	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS && rotationBaseAngle > BASE_ROT_MIN && !isPlaying)
 		rotationBaseAngle -= 25.0f*deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS && rotationArm2Angle < ARM2_ROT_MAX)
+	if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS && rotationArm2Angle < ARM2_ROT_MAX && !isPlaying)
 		rotationArm2Angle += 25.0f * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS && check_area_xz_axis(grabberlink_location_x,grabberlink_location_z) && grabberlink_location_y >=0.213f && rotationArm2Angle > ARM2_ROT_MIN)
+	if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS && check_area_xz_axis(grabberlink_location_x,grabberlink_location_z) && grabberlink_location_y >=0.213f && rotationArm2Angle > ARM2_ROT_MIN && !isPlaying)
 		rotationArm2Angle -= 25.0f * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS && rotationArm3Angle < ARM3_ROT_MAX)
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS && rotationArm3Angle < ARM3_ROT_MAX && !isPlaying)
 		rotationArm3Angle += 25.0f * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS && check_area_xz_axis(grabberlink_location_x,grabberlink_location_z) && grabberlink_location_y >= 0.213f && rotationArm3Angle > ARM3_ROT_MIN)
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS && check_area_xz_axis(grabberlink_location_x,grabberlink_location_z) && grabberlink_location_y >= 0.213f && rotationArm3Angle > ARM3_ROT_MIN && !isPlaying)
 		rotationArm3Angle -= 25.0f * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && grabber_location <=0.5f)
+	if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && grabber_location <=0.5f && !isPlaying)
 		grabber_movement += 0.5f * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS && grabber_location >=0.0f)
+	if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS && grabber_location >=0.0f && !isPlaying)
 		grabber_movement -= 0.5f * deltaTime;
+	//Nagrywanie
+	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+		isRecording = true;
+	if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
+		isRecording = false;
+	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+		isPlaying = true;
 		
 }
 
@@ -359,4 +428,16 @@ bool check_area_xz_axis(float grabberlink_location_x, float grabberlink_location
 	if (std::abs(grabberlink_location_x) >= 0.8f || std::abs(grabberlink_location_z) >= 0.8f)
 		return true;
 	return false;
+}
+
+std::vector<RobotFrame> loadSequenceFromFile(const std::string& filename) {
+	std::vector<RobotFrame> frames;
+	std::ifstream in(filename);
+	float t, b, a2, a3, g;
+	while (in >> t) {
+		char comma;
+		in >> comma >> b >> comma >> a2 >> comma >> a3 >> comma >> g;
+		frames.push_back({ t, b, a2, a3, g });
+	}
+	return frames;
 }
