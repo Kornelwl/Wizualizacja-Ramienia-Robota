@@ -36,6 +36,9 @@ float rotationArm2Angle = 0.0f;
 float rotationArm3Angle = 0.0f;
 float grabber_movement = 0.0f;
 
+//location for grabber
+float grabber_location = 0.0f;
+
 int main()
 {
 	std::cout << "Starting GLFW context, OpenGL 3.4" << std::endl;
@@ -112,7 +115,6 @@ int main()
 	// Create floor mesh
 	Mesh floor(verts, ind, tex);
 	Model robotModel((char*)"Ramie_robota_poprawa.glb");
-	
 
 	GLuint uniID = glGetUniformLocation(shaderProgram.ID, "scale");
 
@@ -199,6 +201,9 @@ int main()
 		//grabber movement
 		Node* grabber1 = robotModel.findNodeByName(robotModel.rootNode, "Grabber1");
 		if (grabber1) {
+			glm::vec3 localPosition = glm::vec3(grabber1->transformation[3]);
+			std::cout << "Pozycja grabber1: " << localPosition.x << ", " << localPosition.y << ", " << localPosition.z << std::endl;
+			grabber_location = localPosition.z;
 			grabber1->transformation = glm::mat4(1.0f);
 			grabber1->transformation = glm::translate(
 				grabber1->transformation,
@@ -268,9 +273,9 @@ void processInput(GLFWwindow* window)
 		rotationArm3Angle += 25.0f * deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
 		rotationArm3Angle -= 25.0f * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && grabber_location <=0.5f)
 		grabber_movement += 0.5f * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS && grabber_location >=0.0f)
 		grabber_movement -= 0.5f * deltaTime;
 		
 }
