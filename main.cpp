@@ -5,6 +5,7 @@
 #include<glm/glm.hpp>
 #include<glm/gtc/matrix_transform.hpp>
 #include<glm/gtc/type_ptr.hpp>
+#include <cmath>
 
 #include"EBO.h"
 #include"shaderClass.h"
@@ -19,6 +20,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+bool check_area_xz_axis(float grabberlink_location_x, float grabberlink_location_z);
 
 const GLuint WIDTH = 800, HEIGHT = 800;
 //zainicjowanie kamery
@@ -38,6 +40,10 @@ float grabber_movement = 0.0f;
 
 //location for grabber
 float grabber_location = 0.0f;
+float grabberlink_location_x = 0.0f;
+float grabberlink_location_y = 0.0f;
+float grabberlink_location_z = 0.0f;
+
 
 int main()
 {
@@ -134,7 +140,13 @@ int main()
 			glm::vec3(0.2f)
 		);
 	}
-	
+
+	//Pozycja x i z 0.74
+	float count = 0.0f;
+	glm::vec3 grabberlink_position;
+	glm::vec3 grabberlink_position_example;
+
+
 	while (!glfwWindowShouldClose(window))
 	{
 		//Camera settings (calculating each frame to get smoother camera)
@@ -167,6 +179,23 @@ int main()
 		floor.Draw(shaderProgram);
 
 		//robot
+
+		//Calculating positionas after 10000 frames
+		if (count > 10000)
+		{
+			//robotModel.printAllGlobalPositions(robotModel.rootNode, glm::mat4(1.0f));
+			grabberlink_position_example = robotModel.getGlobalPosition(robotModel.rootNode, glm::mat4(1.0f), "Grabber_link");
+			std::cout << "Pozycja grabbera x: " << grabberlink_position_example.x << std::endl << "Pozycja grabbera y: " << grabberlink_position_example.y << std::endl << "Pozycja grabbera z: " << grabberlink_position_example.z << std::endl;
+			count = 0;
+		}
+		else
+			count++;
+		
+		grabberlink_position = robotModel.getGlobalPosition(robotModel.rootNode, glm::mat4(1.0f), "Grabber_link");
+		grabberlink_location_x = grabberlink_position.x;
+		grabberlink_location_y = grabberlink_position.y;
+		grabberlink_location_z = grabberlink_position.z;
+
 		//Baserotator movement
 		Node* Baserotator = robotModel.findNodeByName(robotModel.rootNode, "Base_rotator");
 		if (Baserotator) {
@@ -202,7 +231,6 @@ int main()
 		Node* grabber1 = robotModel.findNodeByName(robotModel.rootNode, "Grabber1");
 		if (grabber1) {
 			glm::vec3 localPosition = glm::vec3(grabber1->transformation[3]);
-			std::cout << "Pozycja grabber1: " << localPosition.x << ", " << localPosition.y << ", " << localPosition.z << std::endl;
 			grabber_location = localPosition.z;
 			grabber1->transformation = glm::mat4(1.0f);
 			grabber1->transformation = glm::translate(
@@ -265,13 +293,13 @@ void processInput(GLFWwindow* window)
 		rotationBaseAngle += 25.0f*deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
 		rotationBaseAngle -= 25.0f*deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS && grabberlink_location_y <=2.2f)
 		rotationArm2Angle += 25.0f * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS && check_area_xz_axis(grabberlink_location_x,grabberlink_location_z) && grabberlink_location_y >=0.213f)
 		rotationArm2Angle -= 25.0f * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS && grabberlink_location_y <=2.2f)
 		rotationArm3Angle += 25.0f * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS && check_area_xz_axis(grabberlink_location_x,grabberlink_location_z) && grabberlink_location_y >= 0.213f)
 		rotationArm3Angle -= 25.0f * deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && grabber_location <=0.5f)
 		grabber_movement += 0.5f * deltaTime;
@@ -304,4 +332,11 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	camera.ProcessMouseScroll(static_cast<float>(yoffset));
+}
+
+bool check_area_xz_axis(float grabberlink_location_x, float grabberlink_location_z)
+{
+	if (std::abs(grabberlink_location_x) >= 0.8f || std::abs(grabberlink_location_z) >= 0.8f)
+		return true;
+	return false;
 }

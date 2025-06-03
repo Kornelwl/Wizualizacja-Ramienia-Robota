@@ -167,3 +167,32 @@ Node* Model::findNodeByName(Node& node, const std::string& name) {
     std::cout << "Nie znaleziono wêz³a" << std::endl;
     return nullptr;
 }
+
+glm::vec3 Model::getGlobalPosition(Node& node, glm::mat4 parentTransform, const std::string& name) {
+    glm::mat4 globalTransform = parentTransform * node.transformation;
+
+    if (node.name == name) {
+        return glm::vec3(globalTransform[3]);
+    }
+
+    for (auto& child : node.children) {
+        glm::vec3 result = getGlobalPosition(child, globalTransform, name);
+        if (result != glm::vec3(0.0f)) {
+            return result;
+        }
+    }
+    std::cout << "Nie znaleziono globalnej pozycji elementu - " << name << std::endl;
+    return glm::vec3(0.0f); //position not found - returning 0,0,0
+}
+
+void Model::printAllGlobalPositions(Node& node, glm::mat4 parentTransform) {
+    glm::mat4 globalTransform = parentTransform * node.transformation;
+    glm::vec3 position = glm::vec3(globalTransform[3]);
+
+    std::cout << "Pozycja globalna " << node.name << ": "
+        << position.x << ", " << position.y << ", " << position.z << std::endl;
+
+    for (auto& child : node.children) {
+        printAllGlobalPositions(child, globalTransform);
+    }
+}
