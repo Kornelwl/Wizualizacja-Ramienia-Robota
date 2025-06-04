@@ -200,7 +200,7 @@ int main()
 				});
 		}
 		//Odtwarzanie
-		if (isPlaying && playIndex < playbackFrames.size()) {
+		if (isPlaying && !playbackFrames.empty()) {
 			RobotFrame& frame = playbackFrames[playIndex];
 			rotationBaseAngle = frame.baseAngle;
 			rotationArm2Angle = frame.arm2Angle;
@@ -208,15 +208,14 @@ int main()
 			grabber_movement = frame.grabberMove;
 
 			playTime += deltaTime;
-			if (playIndex + 1 < playbackFrames.size() &&
-				playbackFrames[playIndex + 1].timestamp <= playTime)
-			{
-				playIndex++;
+
+			if (playIndex + 1 < playbackFrames.size()) {
+				if (playbackFrames[playIndex + 1].timestamp <= playTime)
+					playIndex++;
 			}
 			else
-			{
 				playIndex = 0;
-			}
+			
 		}
 		
 		//Input
@@ -341,6 +340,15 @@ int main()
 			<< frame.arm2Angle << ","
 			<< frame.arm3Angle << ","
 			<< frame.grabberMove << "\n";
+	}
+	//saving data (mirored to have fluent animation - comes back to first position)
+	for (auto it = recordedFrames.rbegin(); it != recordedFrames.rend(); ++it) {
+		float mirroredTime = recordedFrames.back().timestamp + (recordedFrames.back().timestamp - it->timestamp);
+		out << mirroredTime << ","
+			<< it->baseAngle << ","
+			<< it->arm2Angle << ","
+			<< it->arm3Angle << ","
+			<< it->grabberMove << "\n";
 	}
 	out.close();
 
