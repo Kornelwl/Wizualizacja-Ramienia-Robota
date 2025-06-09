@@ -30,9 +30,15 @@ struct RobotFrame {
 
 bool isRecording = false;
 bool isPlaying = false;
+bool isGrabbing = false;
+bool isNear(glm::vec3 a, glm::vec3 b, float threshold = 0.05f) {
+	return glm::distance(a, b) < threshold;
+}
+bool isClosingToGrab = false;  // czy chwytak w³aœnie siê domyka w animacji
+
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow* window);
+void processInput(GLFWwindow* window, Model& blockModel, Model& robotModel);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 bool check_area_xz_axis(float grabberlink_location_x, float grabberlink_location_z);
@@ -72,6 +78,15 @@ const float ARM2_ROT_MAX = 30.0f;
 
 const float ARM3_ROT_MIN = -30.0f;
 const float ARM3_ROT_MAX = 90.0f;
+//
+glm::vec3 blockScale = glm::vec3(0.1f);
+bool isFalling = false;
+float blockFallY = 0.0f;         // aktualna wysokoœæ
+float blockFallSpeed = 0.0f;  // prêdkoœæ spadania
+const float groundY = 0.0f;      // wysokoœæ pod³ogi
+const float gravity = -9.8f;     // przyspieszenie ziemskie
+
+glm::vec3 blockStartPosition = glm::vec3(0.0f, 0.0f, 0.9f);  // pozycja pocz klocka
 
 
 int main()
@@ -160,6 +175,18 @@ int main()
 	// Create floor mesh
 	Mesh floor(verts, ind, tex);
 	Model robotModel((char*)"Ramie_robota_poprawa.glb");
+	Model blockModel((char*)"klocek.glb");
+	blockModel.printAllGlobalPositions(blockModel.rootNode, glm::mat4(1.0f));
+
+	Node* BlockNode = blockModel.findNodeByName(blockModel.rootNode, "Cube.001");
+
+	if (BlockNode) {
+		glm::mat4 T = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.9f)); // gdzie klocek ma le¿eæ
+		glm::mat4 S = glm::scale(glm::mat4(1.0f), blockScale); // zawsze ta sama skala
+
+		BlockNode->transformation = T * S;
+	}
+
 	//Wczytanie pliku z pozycjami robota
 	std::vector<RobotFrame> playbackFrames = loadSequenceFromFile("recording.csv");
 
@@ -219,7 +246,7 @@ int main()
 		}
 		
 		//Input
-		processInput(window);
+		processInput(window, blockModel, robotModel);
 		glClearColor(0.27f, 0.55f, 0.35f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		// macierz 4x4 dodanie lokalizacji modelu i viewportu gdzie ma sie wyswietlac, i dodanie perspective - perspektywa, punkt widzenia na obrazie, w tym przypadku mamy 45 stopni
@@ -255,8 +282,38 @@ int main()
 		//}
 		//else
 		//	count++;
-		
+
 		grabberlink_position = robotModel.getGlobalPosition(robotModel.rootNode, glm::mat4(1.0f), "Grabber_link");
+		// Pobierz pozycjê klocka
+		glm::vec3 blockPosition = blockModel.getGlobalPosition(blockModel.rootNode, glm::mat4(1.0f), "Cube.001");
+		
+		// animacja domykania
+		if (isClosingToGrab && !isGrabbing)
+		{
+			glm::vec3 blockPos = blockModel.getGlobalPosition(blockModel.rootNode, glm::mat4(1.0f), "Cube.001");
+			glm::vec3 grabberPos = robotModel.getGlobalPosition(robotModel.rootNode, glm::mat4(1.0f), "Grabber_link");
+
+			float dx = std::abs(grabberPos.x - blockPos.x);
+			float dz = std::abs(grabberPos.z - blockPos.z);
+			float blockHalf = 0.015f; // po³owa szerokoœci klocka
+
+			float targetGap = blockHalf;
+			float grabSpeed = 0.5f * deltaTime;
+
+			if (grabber_movement > targetGap)
+			{
+				grabber_movement -= grabSpeed;
+			}
+			else
+			{
+				if (dx < 0.05f && dz < 0.05f)
+					isGrabbing = true;
+
+				isClosingToGrab = false; // zakoñcz animacjê domykania
+			}
+		}
+
+
 		grabberlink_location_x = grabberlink_position.x;
 		grabberlink_location_y = grabberlink_position.y;
 		grabberlink_location_z = grabberlink_position.z;
@@ -266,6 +323,40 @@ int main()
 		arm3_location_z = grabberlink_position.z;
 		std::cout << arm3_location_x << " " << arm3_location_y << " " << arm3_location_z << std::endl;
 
+		//chwytanie
+		if (isGrabbing) {
+			Node* BlockNode = blockModel.findNodeByName(blockModel.rootNode, "Cube.001");
+			if (BlockNode) {
+				BlockNode->transformation = glm::mat4(1.0f);
+				glm::vec3 grabOffset = glm::vec3(0.0f, -0.2f, 0.0f); // przesuñ klocek ni¿ej wzglêdem chwytaka
+				BlockNode->transformation = glm::translate(BlockNode->transformation, grabberlink_position + grabOffset);
+				BlockNode->transformation = glm::scale(BlockNode->transformation, blockScale);
+			}
+		}
+		else if (isFalling)
+		{
+			Node* BlockNode = blockModel.findNodeByName(blockModel.rootNode, "Cube.001");
+
+			if (BlockNode)
+			{
+				// aktualizuj prêdkoœæ i pozycjê
+				blockFallSpeed += gravity * deltaTime;
+				blockFallY += blockFallSpeed * deltaTime;
+
+				// zatrzymaj na ziemi
+				if (blockFallY <= groundY)
+				{
+					blockFallY = groundY;
+					blockFallSpeed = 0.0f;
+					isFalling = false;
+				}
+
+				// ustaw transformacjê z aktualn¹ wysokoœci¹
+				glm::mat4 T = glm::translate(glm::mat4(1.0f), glm::vec3(grabberlink_position.x, blockFallY, grabberlink_position.z));
+				glm::mat4 S = glm::scale(glm::mat4(1.0f), blockScale);
+				BlockNode->transformation = T * S;
+			}
+		}
 		//Baserotator movement
 		Node* Baserotator = robotModel.findNodeByName(robotModel.rootNode, "Base_rotator");
 		if (Baserotator) {
@@ -323,6 +414,9 @@ int main()
 		int projLoc_robot = glGetUniformLocation(robotshader.ID, "proj");
 		glUniformMatrix4fv(projLoc_robot, 1, GL_FALSE, glm::value_ptr(proj));
 		robotModel.Draw(robotshader);
+		
+		robotshader.Activate();
+		blockModel.Draw(robotshader);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents(); // obs³uga zdarzeñ (klawiatura, mysz, ...)
@@ -364,8 +458,35 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 }
 //ESC - close window
-void processInput(GLFWwindow* window)
+void processInput(GLFWwindow* window,Model& blockModel, Model& robotModel)
 {
+	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
+	{
+		isGrabbing = false;
+		isFalling = false;
+		blockFallY = blockStartPosition.y;
+		blockFallSpeed = 0.0f;
+
+		Node* BlockNode = blockModel.findNodeByName(blockModel.rootNode, "Cube.001");
+		if (BlockNode) {
+			glm::mat4 T = glm::translate(glm::mat4(1.0f), blockStartPosition);
+			glm::mat4 S = glm::scale(glm::mat4(1.0f), blockScale);
+			BlockNode->transformation = T * S;
+		}
+	}
+	if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS && !isGrabbing && !isClosingToGrab)
+	{
+		isClosingToGrab = true; // tylko aktywuj proces, nic wiêcej tu nie rób!
+	}
+	if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS && isGrabbing)
+	{
+		isGrabbing = false;
+		isFalling = true;
+		blockFallSpeed = 0.0f;
+
+		// ustaw pocz¹tkow¹ wysokoœæ spadania
+		blockFallY = grabberlink_location_y - 0.03f;  // offset by size of the block
+	}
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 	//Camera position input
