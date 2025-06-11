@@ -89,7 +89,13 @@ const float gravity = -9.8f;     // przyspieszenie ziemskie
 
 glm::vec3 blockStartPosition = glm::vec3(1.0f, 0.08f, 0.0f);  // pozycja pocz klocka
 
-
+bool isReturningToStart = false;
+RobotFrame startFrame; // do zapamiêtania pozycji pocz¹tkowej
+RobotFrame endFrame;
+float returnTime = 0.0f;
+const float returnDuration = 1.0f; // czas powrotu w sekundach
+float playTime = 0.0f;
+size_t playIndex = 0;
 int main()
 {
 	//Pozycja x i z 0.74
@@ -99,8 +105,7 @@ int main()
 	glm::vec3 arm3_position;
 
 	std::vector<RobotFrame> recordedFrames;
-	float playTime = 0.0f;
-	size_t playIndex = 0;
+	
 
 	std::cout << "Starting GLFW context, OpenGL 3.4" << std::endl;
 	//Initialize library GLFW
@@ -240,10 +245,50 @@ int main()
 				if (playbackFrames[playIndex + 1].timestamp <= playTime)
 					playIndex++;
 			}
-			else
-				playIndex = 0;
-			
+			else {
+				isPlaying = false;
+				isReturningToStart = true;
+				returnTime = 0.0f;
+
+				// zapamiêtaj aktualny stan jako punkt startowy powrotu
+				endFrame = { 0.0f, rotationBaseAngle, rotationArm2Angle, rotationArm3Angle, grabber_movement };
+
+			}		
 		}
+		else if (isReturningToStart) {
+			returnTime += deltaTime;
+			float t = std::min(returnTime / returnDuration, 1.0f); // znormalizowany czas
+
+			// Interpolacja liniowa (LERP)
+			rotationBaseAngle = glm::mix(endFrame.baseAngle, startFrame.baseAngle, t);
+			rotationArm2Angle = glm::mix(endFrame.arm2Angle, startFrame.arm2Angle, t);
+			rotationArm3Angle = glm::mix(endFrame.arm3Angle, startFrame.arm3Angle, t);
+			grabber_movement = glm::mix(endFrame.grabberMove, startFrame.grabberMove, t);
+
+
+			if (t >= 1.0f) {
+				isReturningToStart = false;
+
+				// Reset kulki
+				Node* BlockNode = blockModel.findNodeByName(blockModel.rootNode, "Kula");
+				if (BlockNode) {
+					glm::mat4 T = glm::translate(glm::mat4(1.0f), blockStartPosition);
+					glm::mat4 S = glm::scale(glm::mat4(1.0f), blockScale);
+					BlockNode->transformation = T * S;
+				}
+
+				isGrabbing = false;
+				isFalling = false;
+
+				// Automatyczne ponowne rozpoczêcie animacji
+				startFrame = { 0.0f, rotationBaseAngle, rotationArm2Angle, rotationArm3Angle, grabber_movement };
+				playIndex = 0;
+				playTime = 0.0f;
+				isPlaying = true;
+			}
+
+		}
+
 		
 		//Input
 		processInput(window, blockModel, robotModel);
@@ -429,15 +474,15 @@ int main()
 			<< frame.grabberMove << "\n";
 	}
 	//saving data (mirored to have fluent animation - comes back to first position)
-	for (auto it = recordedFrames.rbegin(); it != recordedFrames.rend(); ++it) {
-		float mirroredTime = recordedFrames.back().timestamp + (recordedFrames.back().timestamp - it->timestamp);
-		out << mirroredTime << ","
-			<< it->baseAngle << ","
-			<< it->arm2Angle << ","
-			<< it->arm3Angle << ","
-			<< it->grabberMove << "\n";
-	}
-	out.close();
+//	for (auto it = recordedFrames.rbegin(); it != recordedFrames.rend(); ++it) {
+//		float mirroredTime = recordedFrames.back().timestamp + (recordedFrames.back().timestamp - it->timestamp);
+	//	out << mirroredTime << ","
+		//	<< it->baseAngle << ","
+			//<< it->arm2Angle << ","
+			//<< it->arm3Angle << ","
+			//<< it->grabberMove << "\n";
+	//}
+	//out.close();
 
 	//zamkniecie okna kuniec
 	std::cout << "Exiting program" << std::endl;
@@ -501,8 +546,16 @@ void processInput(GLFWwindow* window,Model& blockModel, Model& robotModel)
 		isRecording = true;
 	if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
 		isRecording = false;
-	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
-		isPlaying = true;
+	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+		if (!isPlaying && !isReturningToStart) {
+			startFrame = { 0.0f, rotationBaseAngle, rotationArm2Angle, rotationArm3Angle, grabber_movement };
+			playIndex = 0;
+			playTime = 0.0f;
+			isPlaying = true;
+		}
+	}
+
+
 		
 }
 
